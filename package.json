@@ -1,0 +1,30 @@
+{
+  "name": "mongoose-encrypt",
+  "version": "0.0.0",
+  "description": "Transparent encryption for Mongoose fields with encryption key migration built in",
+  "main": "./lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Prinzhorn/mongoose-encrypt.git"
+  },
+  "keywords": [
+    "mongoose",
+    "encryption",
+    "aes256"
+  ],
+  "author": "Alexander Prinzhorn <alexander@prinzhorn.it>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Prinzhorn/mongoose-encrypt/issues"
+  },
+  "homepage": "https://github.com/Prinzhorn/mongoose-encrypt",
+  "devDependencies": {
+    "mongoose": "3.8.x"
+  }
+}
