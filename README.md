@@ -31,7 +31,7 @@ var encrypt = require('mongoose-encrypt');
 
 var userSchema = new Schema({
 	createdAt: Date,
-	twitterData: {
+	twitter: {
 		name: String,
 		token: String
 	}
