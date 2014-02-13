@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var encrypt = require('../lib');
 
 mongoose.connect('mongodb://localhost/mongoose-encrypt');
-mongoose.set('debug', true);
+mongoose.set('debug', false);
 
 var userSchema = new Schema({
 	_id: String,
@@ -12,17 +12,17 @@ var userSchema = new Schema({
 	secret2: String
 });
 
-var useNewPassword = false;
+//We'll later adjust this date to simulate password migration.
+var newPasswordDate = new Date(2070, 01, 01);
 
 userSchema.plugin(encrypt, {
 	properties: ['secret1', 'secret2'],
-	password: function(date, done) {
-		//The "useNewPassword" flag is only used for the unit tests.
-		//In a real world scenario you would return the password depending on the date parameter.
-		//E.g. when you want to use the new password starting on 01.01.2014,
-		//then return the new one for all dates greater than this and the old password otherwise.
-
-		done(null, useNewPassword ? 'correcthorsebatterystaple' : 'keyboardkitten');
+	password: function(date) {
+		if(date >= newPasswordDate) {
+			return 'correcthorsebatterystaple';
+		} else {
+			return 'keyboardkitten';
+		}
 	}
 });
 
@@ -139,6 +139,8 @@ describe('Legacy data, which is already present and unencrypted', function() {
 		User.findOne({_id: 'user2'}).exec(function(err, user) {
 			assert.ifError(err);
 
+			user.secret1 = user.secret1;
+
 			user.save(function(err) {
 				assert.ifError(err);
 
@@ -156,6 +158,13 @@ describe('Legacy data, which is already present and unencrypted', function() {
 });
 
 describe('Password migration', function() {
+	before(function(done) {
+		newPasswordDate = new Date();
+
+		//Wait a moment to make sure the password migration actually has to different dates to use.
+		setTimeout(done, 10);
+	});
+
 	it('should use the old password for decryption and then the new one for encryption', function(done) {
 		User.findOne({_id: 'user2'}).lean().exec(function(err, user) {
 			assert.ifError(err);
@@ -167,11 +176,14 @@ describe('Password migration', function() {
 				assert.ifError(err);
 
 				assert.strictEqual(user.secret1, 'secret', 'The secret1 is readable.');
-				useNewPassword = true;
+
+				user.secret1 = user.secret1;
 
 				user.save(function(err, user) {
 					assert.ifError(err);
 
+					//TODO: this one is failing, because when encrypting the data in `pre save` hook,
+					//they are also encrypted when using this instance after saving.
 					assert.strictEqual(user.secret1, 'secret', 'The secret1 is readable.');
 
 					User.findOne({_id: 'user2'}).lean().exec(function(err, user) {
