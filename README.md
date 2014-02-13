@@ -9,14 +9,14 @@ Allows you to easily encrypt `String` fields using `aes-256-cbc`.
 Idea
 ====
 
-Store a timestamp along the encrypted data to allow painless encryption key migration.
+Store a timestamp along the encrypted data to allow painless password migration.
 
-The data that is stored in MongoDB as UTF-8 strings and consists of (from left to right)
+The data that is stored in MongoDB as base64 encoded strings and consists of (from left to right)
 
-* the string `ENCRYPTED___` to handle a mix of encrypted/unencrypted data (you can drop this plugin into your existing data),
-* 8 chars representing the seconds since the Unix epoch in hex (for range query pleasure),
-* a 16 char (8 byte) salt string which is randomly generated for every encrypted string and appended to the password,
-* and the encrypted data itself as UTF-8 string.
+* the string `ENCRYPTED___` to handle a mix of encrypted/unencrypted data (**you can drop this plugin into your existing data**),
+* 8 chars representing the seconds since the Unix epoch in hex (for range query pleasure and password migration),
+* a 16 chars (8 byte) salt hex string which is randomly generated for every encrypted string and appended to the password before encrypting and decrypting,
+* and the encrypted data itself as base64 string.
 
 
 Usage
@@ -30,21 +30,24 @@ Now imagine a website where users sign up with their Twitter account. It's proba
 var encrypt = require('mongoose-encrypt');
 
 var userSchema = new Schema({
-	name: String,
-	twitterToken: String
+	createdAt: Date,
+	twitterData: {
+		name: String,
+		token: String
+	}
 });
 
 offerSchema.plugin(encrypt, {
-	properties: ['twitterToken'],
-	password: function(date, done) {
+	paths: ['twitter.token'],
+	password: function(date) {
 		//Return the correct password for the given date.
 		//As long as you don't need to migrate to a new password, just return the current one.
-		done(null, process.env.AES_ENCRYPTION_PASSWORD);
+		return process.env.AES_ENCRYPTION_PASSWORD;
 	}
 });
 ```
 
-That's it! The plugin sets up pre `init` and `save` hooks to anynchronously decrypt and encrypt each property on the fly using `aes-256-cbc`.
+That's it! The plugin sets up a `getter` and `setter` to decrypt and encrypt each path on the fly using `aes-256-cbc`.
 
 
 Use cases

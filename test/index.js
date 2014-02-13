@@ -9,14 +9,16 @@ mongoose.set('debug', false);
 var userSchema = new Schema({
 	_id: String,
 	secret1: String,
-	secret2: String
+	nested: {
+		secret2: String
+	}
 });
 
 //We'll later adjust this date to simulate password migration.
 var newPasswordDate = new Date(2070, 01, 01);
 
 userSchema.plugin(encrypt, {
-	properties: ['secret1', 'secret2'],
+	paths: ['secret1', 'nested.secret2'],
 	password: function(date) {
 		if(date >= newPasswordDate) {
 			return 'correcthorsebatterystaple';
@@ -50,7 +52,7 @@ describe('Basic encryption', function() {
 			assert.notEqual(user.secret1, 'secret', 'The secret1 is not in plain text.');
 			assert(/^ENCRYPTED___/.test(user.secret1), 'The secret1 starts with the magic prefix.');
 
-			assert.strictEqual(user.secret2, undefined, 'The secret2 is not set.');
+			assert.strictEqual(user.nested, undefined, 'The nested.secret2 is not set.');
 
 			done();
 		});
@@ -61,7 +63,7 @@ describe('Basic encryption', function() {
 			assert.ifError(err);
 
 			assert.strictEqual(user.secret1, 'secret', 'The secret1 is readable.');
-			assert.strictEqual(user.secret2, undefined, 'The secret2 is not set.');
+			assert.strictEqual(user.nested.secret2, undefined, 'The nested.secret2 is not set.');
 
 			done();
 		});
@@ -72,7 +74,7 @@ describe('Basic encryption', function() {
 			assert.ifError(err);
 
 			user.secret1 = 'new secret';
-			user.secret2 = 'new secret 2';
+			user.nested.secret2 = 'new secret 2';
 
 			user.save(function(err) {
 				assert.ifError(err);
@@ -81,7 +83,7 @@ describe('Basic encryption', function() {
 					assert.ifError(err);
 
 					assert.strictEqual(user.secret1, 'new secret', 'The secret1 has been updated.');
-					assert.strictEqual(user.secret2, 'new secret 2', 'The secret2 has been updated.');
+					assert.strictEqual(user.nested.secret2, 'new secret 2', 'The nested.secret2 has been updated.');
 
 					done();
 				});
@@ -95,7 +97,7 @@ describe('Basic encryption', function() {
 			assert.ifError(err);
 
 			assert.strictEqual(user.secret1, undefined, 'The secret1 is not set.');
-			assert.strictEqual(user.secret2, undefined, 'The secret2 is not set.');
+			assert.strictEqual(user.nested.secret2, undefined, 'The nested.secret2 is not set.');
 
 			done();
 		});
@@ -118,7 +120,7 @@ describe('Legacy data, which is already present and unencrypted', function() {
 			assert.ifError(err);
 
 			assert.strictEqual(user.secret1, 'secret', 'The secret1 is readable in plain text.');
-			assert.strictEqual(user.secret2, undefined, 'The secret2 is not set.');
+			assert.strictEqual(user.nested, undefined, 'The nested.secret2 is not set.');
 
 			done();
 		});
@@ -129,7 +131,7 @@ describe('Legacy data, which is already present and unencrypted', function() {
 			assert.ifError(err);
 
 			assert.strictEqual(user.secret1, 'secret', 'The secret1 is readable in plain text.');
-			assert.strictEqual(user.secret2, undefined, 'The secret2 is not set.');
+			assert.strictEqual(user.nested.secret2, undefined, 'The nested.secret2 is not set.');
 
 			done();
 		});
