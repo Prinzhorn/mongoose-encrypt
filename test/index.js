@@ -30,6 +30,21 @@ userSchema.plugin(encrypt, {
 
 var User = mongoose.model('User', userSchema);
 
+describe('Paths which are not of type String', function() {
+	it('should throw an error', function(done) {
+		assert.throws(function() {
+			(new Schema({
+				not_a_string: Number
+			})).plugin(encrypt, {
+				paths: 'not_a_string',
+				password: Math.random()
+			});
+		});
+
+		done();
+	});
+});
+
 describe('Basic encryption', function() {
 	before(function(done) {
 		//Clear the DB.
