@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha ./test --reporter nyan"
+    "test": "jshint lib/index.js test/index.js && mocha ./test --reporter nyan"
   },
   "repository": {
     "type": "git",
