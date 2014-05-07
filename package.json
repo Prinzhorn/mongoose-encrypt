@@ -1,6 +1,6 @@
 {
   "name": "mongoose-encrypt",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.1",
   "description": "Transparent encryption for Mongoose fields with built-in password migration",
   "main": "./lib/index.js",
   "directories": {
@@ -15,6 +15,7 @@
   },
   "keywords": [
     "mongoose",
+    "mongodb",
     "encryption",
     "aes256"
   ],
