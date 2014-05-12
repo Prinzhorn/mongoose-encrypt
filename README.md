@@ -37,7 +37,7 @@ var userSchema = new Schema({
 	}
 });
 
-offerSchema.plugin(encrypt, {
+userSchema.plugin(encrypt, {
 	paths: ['twitter.token'],
 	password: function(date) {
 		//Return the correct password for the given date.
