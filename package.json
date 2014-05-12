@@ -27,8 +27,5 @@
   "homepage": "https://github.com/Prinzhorn/mongoose-encrypt",
   "devDependencies": {
     "mongoose": "3.8.x"
-  },
-  "dependencies": {
-    "async": "0.2.x"
   }
 }
