@@ -106,6 +106,31 @@ describe('Basic encryption', function() {
 		});
 	});
 
+	it('should not double encrypt a value that is already encrypted', function(done) {
+		// Encrypted value can get passed around accidentally if it's nested
+		var user2 = new User({
+			_id: 'user2',
+			nested: {
+				secret2: 'new secret 2'
+			}
+		});
+		User.findOne({_id: 'user1'}).exec(function(err, user) {
+			assert.ifError(err);
+
+			user.nested = user2.nested;
+
+			user.save(function(err) {
+				assert.ifError(err);
+
+				User.findOne({_id: 'user1'}).exec(function(err, user) {
+					assert.ifError(err);
+					assert.strictEqual(user.nested.secret2, 'new secret 2', 'The nested.secret2 has been updated.');
+					done();
+				});
+			});
+		});
+	});
+
 	it('should leave unset properties untouched', function(done) {
 		//Only fetch the _id property.
 		User.findOne({_id: 'user1'}, {_id: 1}).exec(function(err, user) {
